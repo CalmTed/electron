@@ -33,7 +33,10 @@ function showView(sw_view) {
   }
   fixed = '<div class="context-menu hidden"></div>';
   vin.innerHTML = header + content + fixed;
+
+
   document.querySelector(".vin").addEventListener("click", function(e) {
+    //if context menu is shown
     if (!document.querySelector('.context-menu').classList.contains('hidden')) {
       if (e.target.classList.contains('context-task')) {
         context(e.target, e.pageX, e.pageY);
@@ -42,6 +45,10 @@ function showView(sw_view) {
       }
     } else {
       context(e.target, e.pageX, e.pageY)
+    }
+    //if task is beeing edited
+      if (document.querySelector('.task.editing') && !e.target.classList.contains('cm-option') && !e.target.classList.contains('task-name') && !e.target.classList.contains('task-name-input')) {
+      cancelTaskEditing();
     }
   });
 }
@@ -65,7 +72,7 @@ function toggleChildren(e) {
   }
 
   //save this child state
-  let neededOpenState = !e.classList.contains('close'); //document.querySelector('.'+tasksToHide[0]).classList.contains('hidden');
+  let neededOpenState = !e.classList.contains('close');
   //toggle children view
   tasksToHide.map((task_id) => {
     if (document.querySelector('.' + task_id)) {
@@ -125,7 +132,7 @@ function context(e, x, y) {
   } else if (e.classList.contains('context-task')) {
     //content
     options = '';
-    options += '<div class="cm-option" onclick="">Edit task</div>';
+    options += '<div class="cm-option" onclick="editTaskName(\''+e.getAttribute('taskId')+'\')">Edit task</div>';
     options += '<div class="cm-option" onclick="">Add new task inside</div>';
     options += '<div class="cm-option" onclick="">Delete task</div>';
     cm.innerHTML = options;
@@ -150,6 +157,29 @@ function context(e, x, y) {
     }
     cm.classList.remove('hidden');
   }
+}
+
+//edit task name
+function editTaskName(task_id){
+  document.querySelector('.'+task_id).classList.add('editing');
+  let taskName = document.querySelector('.'+task_id+' .task-name');
+  let namenow = taskName.innerHTML;
+  taskName.innerHTML = '<input type="text" class="task-name-input" oldvalue="'+namenow+'" value="'+namenow+'"><input class="task-name-input" type="submit" onclick="saveTaskName()">';
+
+}
+function cancelTaskEditing(){
+  let taskName = document.querySelector('.task.editing .task-name');
+  oldName = document.querySelector('.task.editing .task-name input').getAttribute('oldvalue');
+  taskName.innerHTML = oldName;
+  document.querySelector('.task.editing').classList.remove('editing');
+}
+function saveTaskName(){
+  console.log('save');
+  let taskName = document.querySelector('.task.editing .task-name');
+  newName = document.querySelector('.task.editing .task-name input').getAttribute('value');
+  taskName.innerHTML = newName;
+  changeTask('input_1','name',newName);
+  document.querySelector('.task.editing').classList.remove('editing');
 }
 
 showView(selected_view);
