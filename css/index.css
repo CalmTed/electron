@@ -1,0 +1,97 @@
+.vin {
+  --bg: #222;
+  --hover: #333;
+  --color: #bbb;
+  --font: Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--color);
+  font-family: var(--font);
+  margin: 0;
+  transition: all .2s;
+}
+
+.header {
+  display: flex;
+  width: 100%;
+  height: 80px;
+  box-shadow: 0 0 1px 1px #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top:0;
+  z-index: 4000;
+  background: var(--bg);
+}
+
+.header .button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 100%;
+}
+
+.header .button:hover {
+  background: var(--hover);
+  cursor: pointer;
+}
+
+.title {
+  flex: 1;
+  font-size: 32px;
+  /* font-weight: bold; */
+  height: 100%;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-right:80px;
+}
+
+.content {
+  top:80px;
+  z-index: 3000;
+  position: absolute;
+  height: calc(100vh - 80px);
+  display: flex;
+  flex-wrap: wrap;
+  overflow: auto;
+}
+.content::-webkit-scrollbar-track
+{
+  background-color: transparent;
+}
+
+.content::-webkit-scrollbar
+{
+    width: 10px;
+    background-color: transparent;
+}
+
+.content::-webkit-scrollbar-thumb
+{
+    border-radius: 2px;
+    background-color: var(--hover);
+}
+.task {
+  height: 56px;
+  width: 100%;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.task:hover{
+  cursor: pointer;
+  background: var(--hover);
+}
+.task.ready{
+  text-decoration: line-through;
+}
+.task-name{
+  padding-left: 18px;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-start;
+}
