@@ -10,7 +10,7 @@ function createWindow () {
     },
     backgroundColor: '#2e2c29',
     resizable:false,
-    alwaysOnTop: true,
+    // alwaysOnTop: true,
     titleBarStyle:'hidden',
     autoHideMenuBar:true
     //skipTaskbar:true

@@ -1,0 +1,26 @@
+(dd.mm hh.mm-hh.mm[, dd.mm hh.mm-hh.mm])
+(27.04 18:46-19:45, )
+
+Finish project 6h 55min
+  create-react-app + webpack = 1-1.5h
+  transfer from expo 1h
+    modules 15min (if copy-paste)
+      graph
+      header
+      indicator
+      ping
+    app.js 30min
+    assets 15min (copy-paste)
+      index.css
+  ping google com 15min
+    import npm module ping
+    get ping - get time
+    insert in Design
+  speed test 2h 20min
+    install RN fetch blob fs 15min
+    download picture 1-1.5h ( just dono if works )
+    get speed 5min
+    get optimal pic size 30min
+  svg animation 2h
+    graph
+END

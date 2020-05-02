@@ -39,8 +39,8 @@
         "status":"notready",
         "children":{
           "1":"task_5",
-          "1":"task_6",
-          "2":"task_7"
+          "2":"task_6",
+          "3":"task_7"
         }
       },
       "task_5":{

@@ -1,13 +1,15 @@
 .vin {
   --bg: #222;
   --hover: #333;
+  --mid: #777;
   --color: #bbb;
   --font: Roboto, sans-serif;
+  --trans: all .1s ease-in;
   background: var(--bg);
   color: var(--color);
   font-family: var(--font);
   margin: 0;
-  transition: all .2s;
+  transition: var(--trans);
 }
 
 .header {
@@ -19,7 +21,7 @@
   align-items: center;
   justify-content: space-between;
   position: fixed;
-  top:0;
+  top: 0;
   z-index: 4000;
   background: var(--bg);
 }
@@ -30,6 +32,23 @@
   justify-content: center;
   width: 80px;
   height: 100%;
+}
+
+.button::before {
+  content: '';
+  height: 12px;
+  width: 22px;
+  border: 2px solid #777;
+  border-right: 0;
+  border-left: 0;
+  margin-right: -22px;
+}
+
+.button::after {
+  height: 0;
+  width: 22px;
+  border-top: 2px solid #777;
+  content: '';
 }
 
 .header .button:hover {
@@ -45,53 +64,192 @@
   align-items: center;
   display: flex;
   justify-content: center;
-  margin-right:80px;
+  margin-right: 80px;
+  /* font-variant: small-caps; */
 }
 
 .content {
-  top:80px;
+  top: 80px;
   z-index: 3000;
   position: absolute;
   height: calc(100vh - 80px);
   display: flex;
   flex-wrap: wrap;
   overflow: auto;
+  align-content: flex-start;
 }
-.content::-webkit-scrollbar-track
-{
+
+.content::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-.content::-webkit-scrollbar
-{
-    width: 10px;
-    background-color: transparent;
+.content::-webkit-scrollbar {
+  width: 10px;
+  background-color: transparent;
 }
 
-.content::-webkit-scrollbar-thumb
-{
-    border-radius: 2px;
-    background-color: var(--hover);
+.content::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background-color: var(--mid);
 }
+
 .task {
-  height: 56px;
+  height: 46px;
   width: 100%;
-  font-size: 18px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: var(--trans);
+  ;
+  overflow: hidden;
+  opacity: 1;
 }
-.task:hover{
+
+/* .task:hover{
   cursor: pointer;
   background: var(--hover);
-}
-.task.ready{
+} */
+.task.ready .task-name {
   text-decoration: line-through;
 }
-.task-name{
-  padding-left: 18px;
+
+.task.hidden {
+  height: 0;
+  opacity: 0;
+}
+
+.task-name {
+  padding-left: 6px;
   display: flex;
   flex: 1;
   align-items: center;
   justify-content: flex-start;
+}
+
+.task-menu {
+  height: 100%;
+  width: 56px;
+  opacity: 0;
+  transition: var(--trans);
+  ;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.task-menu:hover {
+  cursor: pointer;
+}
+
+.task:hover .task-menu {
+  opacity: 1;
+}
+
+.task-menu:before {
+  content: '...';
+  font-size: 25px;
+  transform: rotate(90deg);
+  line-height: 2px;
+}
+
+.task-children-toggle {
+  height: 100%;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.task-children-toggle::before {
+  content: '';
+  border: 2px solid #777;
+  border-top: 0;
+  border-left: 0;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: var(--trans);
+}
+
+.task-children-toggle.closed::before {
+  content: '';
+  border: 2px solid #777;
+  border-top: 0;
+  border-left: 0;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  transform: rotate(-45deg) translate(-2px, -2px);
+}
+
+.task-children-toggle:hover {
+  cursor: pointer;
+  background: var(--hover);
+}
+
+.task-children-toggle-margin {
+  height: 100%;
+  width: 40px;
+}
+.task-children-toggle-add {
+  height: 100%;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.task-children-toggle-add::before{
+content: '';
+    border-top: 2px solid #777;
+    width: 14px;
+    height: 0px;
+    display: inline-block;
+    position: relative;
+    margin-right: -8px;
+}
+.task-children-toggle-add::after{
+content: '';
+    border-left: 2px solid #777;
+    width: 0px;
+    height: 14px;
+    display: inline-block;
+    position: relative;
+}
+
+/*   FIXED    */
+.context-menu {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  min-width: 150px;
+  min-height: 50px;
+  background: var(--bg);
+  z-index: 4500;
+  box-shadow: 0 0 1px 1px #eee;
+  transition:all .1s ease-in, top 0s, left 0s;
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  border-radius: 2px;
+}
+
+.context-menu.hidden{
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+  visibility: hidden;
+}
+
+.cm-option {
+  height: 50px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0 12px;
+}
+.cm-option:hover{
+  cursor: pointer;
+  background: var(--hover);
 }

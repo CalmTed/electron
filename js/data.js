@@ -91,7 +91,6 @@ function changeTask(task_id, task_prop, task_value) {
     if (tasksObjects[task_id] !== null) {
       if (task_prop == 'status' && task_value == 'toggle') {
         let newvalue;
-        console.log(tasksObjects[task_id].status);
         switch (tasksObjects[task_id].status) {
           case 'notready':
             newvalue = 'ready';
