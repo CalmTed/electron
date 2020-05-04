@@ -6,7 +6,10 @@
   "dependencies": {},
   "devDependencies": {
     "electron": "^8.2.5",
-    "remote": "^0.2.6"
+    "remote": "^0.2.6",
+    "fresh": ">=0.5.2",
+    "mime": ">=1.4.1",
+    "send": ">=0.11.1"
   },
   "scripts": {
     "start": "electron .",
