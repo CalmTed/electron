@@ -108,12 +108,40 @@ function changeTask(task_id, task_prop, task_value) {
           updatedTask.classList.remove('notready');
           updatedTask.classList.add(newvalue);
         }
+      }else if(task_prop == 'name'){
+        tasksObjects[task_id].name = task_value;
+        setData('tasks',tasksObjects);
       }
     }
   }
 }
+function createTask(parent, task_name,[data] = []){
 
+  tasksObjects = getData('tasks');
+  //create random id
+  task_id = 'task_'+getRandomId(5);
+  //create new task
+  newObject = new Object();
+  newObject.name = task_name;
+  newObject.times = {};
+  newObject.status = 'notready';
+  newObject.children = {};
+  //add child id to parent
 
+  tasksObjects[parent].children[Object.keys(tasksObjects[parent].children).length+1] = task_id;
+  //add to all tasks
+  tasksObjects[task_id] = newObject;
+  setData('tasks',tasksObjects);
+}
+
+function getRandomId(length){
+  chars = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+  let word = '';
+  for(let i=0; i < length; i++){
+    word += chars[Math.round(Math.random()*(chars.length-1))];
+  }
+  return word;
+}
 // TOO HARD and LONG FOR 1AM
 //
 // function convertFromTabulatedToJSON(text){

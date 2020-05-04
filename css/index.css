@@ -84,13 +84,14 @@
 }
 
 .content::-webkit-scrollbar {
-  width: 10px;
+  width: 7px;
   background-color: transparent;
 }
 
 .content::-webkit-scrollbar-thumb {
-  border-radius: 2px;
+  border-radius: 1px;
   background-color: var(--mid);
+  border: 1px solid transparent;
 }
 
 .task {
@@ -127,12 +128,17 @@
   justify-content: flex-start;
 }
 
+.task-name-input{
+  font-size: 16px;
+
+}
+
 .task-menu {
   height: 100%;
   width: 56px;
   opacity: 0;
   transition: var(--trans);
-  ;
+
   display: flex;
   justify-content: center;
   align-items: center;
