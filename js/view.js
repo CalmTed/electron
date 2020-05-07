@@ -1,7 +1,13 @@
 var vin = document.querySelector('.vin');
-
+const menuButton = '<div class="button" onclick="menu(\'toggle\')"></div>';
+var titleTimeNum = 0; //todays time for all tasks
+var startTime = 0; //start time for every starting job (not sum of anything)
 function showView(sw_view) {
-  /// ---------- PLANNER ---------- ///
+
+
+  /// ---------------------------------- ///
+  /// ------------ PLANNER ------------- ///
+  /// ---------------------------------- ///
   if (sw_view == 'planner') {
     tasksObjects = getData('tasks');
     let tasks = '';
@@ -10,7 +16,7 @@ function showView(sw_view) {
         task = tasksObjects[Object.keys(tasksObjects)[i]];
         let childrenToggle = '<div class="task-children-toggle-margin"></div>';
         if (Object.keys(task.children).length > 0) {
-          childrenToggle = '<div class="task-children-toggle" onclick="toggleChildren(this)" children="' + Object.values(task.children).toString() + '"></div>';
+          //childrenToggle = '<div class="task-children-toggle" onclick="toggleChildren(this)" children="' + Object.values(task.children).toString() + '"></div>';
         }
         tasks += '<div class="task ' + Object.keys(tasksObjects)[i] + ' ' + task.status + '" >' + childrenToggle + '<span class="task-name" >' + task.name + '</span><span class="task-menu context-task" taskId="' + Object.keys(tasksObjects)[i] + '" onclick=""></span></div>';
         // tasks += '<div class="task ' + Object.keys(tasksObjects)[i] + ' ' + task.status + '"  onclick="try{changeTask(\'' + Object.keys(tasksObjects)[i] + '\',\'status\',\'toggle\')}catch(e){}">' + childrenToggle + '<span class="task-name">' + task.name + '</span><span class="task-menu"></span></div>';
@@ -19,18 +25,68 @@ function showView(sw_view) {
       tasks += '<div class="task task_addnew_top" onclick="addTask(\'task_addnew_top\')"><div class="task-children-toggle-add"></div><span class="task-name">Add new task</span></div>';
     } else {
       //no tasks
-      tasks += '<div class="task"><div class="task-children-toggle-margin"></div><span class="task-name">You\'re free to go</span><span class="task-menu"></span></div>';
+      tasks += '<div class="task"><div class="task-children-toggle-margin"></div><span class="task-name">You\'re free to go</span></div>';
     }
     content = '<div class="content">' + tasks + '</div>';
 
-    header = '<div class="header"><div class="button" onclick="showMenu()"></div><div class="title">Planner</div></div>';
+    header = '<div class="header">' + menuButton + '<div class="title">Planner</div></div>';
+
+
+    /// ---------------------------------- ///
     /// ---------- TIME TRACKER ---------- ///
+    /// ---------------------------------- ///
+
+
   } else if (sw_view == 'tracker') {
-    content = '<div class="content"></div>';
-    header = '<div class="header"><div class="button"></div><div class="title"></div></div>';
+    tasksObjects = getData('tasks');
+    let tasks = '';
+    let titleMoneyText = '$0';
+    let titleTimeText = '00:00:00';
+    titleTimeNum = 0;
+    if (Object.keys(tasksObjects).length > 0) {
+      for (i = 0; i < Object.keys(tasksObjects).length; i++) {
+        task = tasksObjects[Object.keys(tasksObjects)[i]];
+        if (Object.keys(task.children).length == 0 && task.status !== 'almostready') {
+          task_id = Object.keys(tasksObjects)[i];
+          //get task time
+          taskFullTimeNum = 0; //from creting
+          taskTodayTimeNum = 0; //todys time
+          if (Object.keys(task.times).length > 0) {
+            for (j = 0; j < Object.keys(task.times).length; j++) {
+              durationTime = Number(task.times[Object.keys(task.times)[j]].duration);
+              taskFullTimeNum += durationTime;
+              //is todays
+              date = new Date();
+              lastMidnight = date.getTime() - (date.getSeconds() * 1000 + date.getMinutes() * 60000 + date.getHours() * 3600000);
+              if (Number(task.times[Object.keys(task.times)[j]].end) > lastMidnight) {
+                titleTimeNum += durationTime;
+                taskTodayTimeNum += durationTime;
+              }
+            }
+          }
+          taskTimeSumText = formatTime('task', taskFullTimeNum);
+
+          taskToggle = '<div class="task-toggle ' + task.status + '" onclick="changeTask(\'' + task_id + '\',\'status\',\'toggle\')" ><span class="task-toggle-blocky"></span></div>';
+          tasks += '<div class="task ' + task_id + ' ' + task.status + '" taskid="' + task_id + '">' + taskToggle + '<span class="task-name" >' + task.name + '</span><span class="task-time-sum" taskTodayDur="' + taskTodayTimeNum + '">' + taskTimeSumText + '</span><span class="task-timmer-tools"><span class="task-timmer-toggle" onclick="triggerTaskTimmer(\'' + task_id + '\')"></span></span></div>';
+
+        }
+      }
+    } else {
+      //no tasks
+      tasks += '<div class="task"><div class="task-children-toggle-margin"></div><span class="task-name">You\'re free to go</span></div>';
+    }
+
+    content = '<div class="content">' + tasks + '</div>';
+
+    //set time and money
+    titleTimeText = formatTime('title', titleTimeNum);
+    titleMoneyText = '₴' + Math.round(((titleTimeNum / 3600000) * payment) * 100) / 100;
+
+    header = '<div class="header">' + menuButton + '<div class="title">' + titleTimeText + '</div><div class="header-money-ticker">' + titleMoneyText + '</div></div>';
+
   } else {
     content = '<div class="content"><div class="all-cented">We are having some troubles. You doomed -_-</div></div>';
-    header = '<div class="header"><div class="button"></div><div class="title">View of error</div></div>';
+    header = '<div class="header">' + menuButton + '<div class="title">Error view</div></div>';
   }
   fixed = '<div class="context-menu hidden"></div>';
   vin.innerHTML = header + content + fixed;
@@ -46,7 +102,7 @@ function showView(sw_view) {
         context('close');
       }
     } else {
-      context(e.target, e.pageX, e.pageY)
+      context(e.target, e.pageX, e.pageY);
     }
     //if task is beeing edited
     if (document.querySelector('.task.editing') && !e.target.classList.contains('cm-option') && !e.target.classList.contains('task-name') && !e.target.classList.contains('task-name-input')) {
@@ -55,7 +111,17 @@ function showView(sw_view) {
     if (document.querySelector('.task.editingNew') && !e.target.classList.contains('cm-option') && !e.target.classList.contains('task-name-input') && !e.target.classList.contains('task-name')) {
       cancelTaskCreating(document.querySelector('.task.editingNew'));
     }
+    //stoping timer
+    if (document.querySelector('.vin.timmering') && e.target.classList.contains('button')) {
+      saveTaskTimmer(document.querySelector('.task.timmering').getAttribute('taskid'));
+    }
   });
+
+  window.addEventListener("beforeunload", function() {
+    if(document.querySelector('.vin.timmering')){
+      saveTaskTimmer(document.querySelector('.task.timmering').getAttribute('taskid'));
+    }
+  })
 }
 
 function toggleChildren(e) {
@@ -108,18 +174,19 @@ function toggleChildren(e) {
 
 function colorModeCheck() {
   let time = new Date().getHours();
+  let target = document.querySelector('body');
   //day
   if (time > 6 && time < 20) {
-    vin.style.setProperty('--bg', "#fff");
-    vin.style.setProperty('--hover', "#eee");
-    vin.style.setProperty('--mid', "#ccc");
-    vin.style.setProperty('--color', "#000");
+    target.style.setProperty('--bg', "#fff");
+    target.style.setProperty('--hover', "#eee");
+    target.style.setProperty('--mid', "#ccc");
+    target.style.setProperty('--color', "#000");
     //night
   } else {
-    vin.style.setProperty('--bg', "#222");
-    vin.style.setProperty('--hover', "#333");
-    vin.style.setProperty('--mid', "#777");
-    vin.style.setProperty('--color', "#bbb");
+    target.style.setProperty('--bg', "#222");
+    target.style.setProperty('--hover', "#333");
+    target.style.setProperty('--mid', "#777");
+    target.style.setProperty('--color', "#bbb");
   }
 }
 colorModeCheck();
@@ -136,8 +203,9 @@ function context(e, x, y) {
     //content
     options = '';
     options += '<div class="cm-option" onclick="editTaskName(\'' + e.getAttribute('taskId') + '\')">Edit name</div>';
-    options += '<div class="cm-option" onclick="addTask(\'' + e.getAttribute('taskId') + '\')">Add new task inside</div>';
-    options += '<div class="cm-option" onclick="">Delete task</div>';
+    options += '<div class="cm-option" onclick="changeTask(\'' + e.getAttribute('taskId') + '\',\'status\',\'toggle\')">Toggle status</div>';
+    //options += '<div class="cm-option" onclick="addTask(\'' + e.getAttribute('taskId') + '\')">Add new task inside</div>';
+    options += '<div class="cm-option" onclick="deleteTask(\'' + e.getAttribute('taskId') + '\')">Delete task</div>';
     cm.innerHTML = options;
     //syze and position
     cm.style.right = 'auto';
@@ -195,13 +263,14 @@ function addTask(task_id) {
   //if its created from the top
   if (!document.querySelector('.task.editingNew')) {
 
-    let addNewInput = '<input type="text" class="task-name-input" placeholder="Add new task"><input class="task-name-input" type="submit" onclick="saveNewTask(\'' + task_id + '\')">';
+    let addNewInput = '<input type="text" class="task-name-input" placeholder="Add new task"><input class="task-name-input" type="submit" value="Create"   onclick="saveNewTask(\'' + task_id + '\')">';
 
     if (document.querySelector('.' + task_id).classList.contains('task_addnew_top')) {
       document.querySelector('.' + task_id + ' .task-name').innerHTML = addNewInput;
       document.querySelector('.' + task_id).classList.add('task_addnew');
+      document.querySelector('.' + task_id + ' .task-name input').focus();
       //document.querySelector('.task.task_addnew').classList.remove('task_addnew_top');
-    } else {//if selected taks closed open it
+    } else { //if selected taks closed open it
       if (document.querySelector('.' + task_id + ' .task-children-toggle')) {
         //open every chilren
         if (document.querySelector('.' + task_id + ' .task-children-toggle').classList.contains('closed')) {
@@ -213,7 +282,7 @@ function addTask(task_id) {
             }
           });
         }
-      } else {//if selected task is a leaf
+      } else { //if selected task is a leaf
         //create trigger with children
         console.log(task_id);
         triggerToAdd = document.createElement('div');
@@ -271,24 +340,196 @@ function cancelTaskCreating(parent_task) {
   }
 }
 
-function saveNewTask(parent_task){
+function saveNewTask(parent_task) {
   taskName = document.querySelector('.task_addnew .task-name-input').value;
   if (taskName.length > 0 && taskName.length < 80) {
-    createTask(parent_task,taskName);
-    if(document.querySelector('.task.editingNew').classList.contains('task_addnew_top')){
+    let new_task_id = '';
+    try {
+      new_task_id = createTask(parent_task, taskName);
+      //if this new task is on top level
+      if (document.querySelector('.task.editingNew').classList.contains('task_addnew_top')) {
 
-    }else{
-      //remove add task-children-toggle-add
-      //replace name
-      //add menu
+        document.querySelector('.task_addnew_top .task-name').innerHTML = 'Add new task';
+        document.querySelector('.task_addnew_top').classList.remove('editingNew');
+
+        let newTask = document.createElement('div');
+        newTask.classList.add('task');
+        newTask.classList.add(new_task_id);
+        newTask.classList.add('notready');
+        newTask.innerHTML = '<div class="task-children-toggle-margin"></div><span class="task-name" >' + taskName + '</span><span class="task-menu context-task" taskId="' + new_task_id + '" onclick=""></span>';
+        document.querySelector('.content').insertBefore(newTask, document.querySelector('.task_addnew_top'));
+
+      } else {
+        //remove add task-children-toggle-add
+        //replace name
+        //add menu
+      }
+    } catch (e) {
+      console.log('Error creating new task with name: ' + taskName);
+      console.error(e);
     }
-  }else{
+  } else {
     cancelTaskCreating();
   }
 }
 
+function deleteTask(task_id) {
+  if (deleteTaskFromData(task_id)) {
+    deleteElement('.' + task_id);
+  }
+}
+
 function deleteElement(querySelector) {
-  let elementToDelete = document.querySelector(querySelector);
-  elementToDelete.parentNode.removeChild(elementToDelete);
+  try {
+    let elementToDelete = document.querySelector(querySelector);
+    elementToDelete.parentNode.removeChild(elementToDelete);
+  } catch (e) {
+    console.log('Error on deleting DOM element on query: ' + task_id);
+    console.log(e);
+  }
 }
 showView(selected_view);
+
+function menu(command) {
+  let menu = document.querySelector('.menu');
+  let overlay = document.querySelector('.overlay');
+  switch (command) {
+    case 'toggle':
+      menu.classList.toggle('hidden');
+      overlay.classList.toggle('hidden');
+      break;
+    case 'open':
+      break;
+    case 'close':
+
+      break;
+    default:
+      console.log('There are no command for menu: ' + command);
+
+  }
+}
+
+
+function triggerTaskTimmer(task_id) {
+  if (!vin.classList.contains('timmering')) {
+    startTimmer(task_id);
+  } else {
+    if (document.querySelector('.' + task_id).classList.contains('timmering')) {
+      saveTaskTimmer(task_id);
+    }
+  }
+}
+
+var timmerInterval = 0;
+
+function startTimmer(task_id) {
+  vin.classList.add('timmering');
+  //save start time
+  startTime = new Date().getTime();
+  //change task class
+  document.querySelector('.' + task_id).classList.add('timmering');
+  //change trigger button
+  timmerInterval = setInterval(function() {
+    //header
+    timeNow = new Date().getTime();
+    durNow = timeNow - startTime;
+    document.querySelector('.header .title').innerHTML = formatTime('title', titleTimeNum + durNow);
+    document.querySelector('.header .header-money-ticker').innerHTML = '₴' + Math.round((((titleTimeNum + durNow) / 3600000) * payment) * 100) / 100;
+    document.querySelector('.task.timmering .task-time-sum').innerHTML = formatTime('title', Number(document.querySelector('.task.timmering .task-time-sum').getAttribute('tasktodaydur')) + durNow);
+    //task
+  }, 1000);
+  let playsound = function(){
+    if(document.querySelector('.task.timmering')){
+      sound = document.createElement('audio');
+      timeNow = new Date().getTime();
+      durNow = (timeNow - startTime)/3600000;
+      if(Math.abs(durNow - Math.round(durNow)) < 0.1){
+        sound.src = './static/aberrian_long.mp3';
+      }else{
+        sound.src = './static/aberrian_short.mp3';
+      }
+      sound.volume = 0.05;
+      sound.play();
+      document.querySelector('.task.timmering').appendChild(sound);
+      setTimeout(function(){
+        playsound();
+      },1000*60*15);
+    }
+  }
+  setTimeout(function(){
+    playsound();
+  },1000);
+}
+
+function saveTaskTimmer(task_id) {
+  endTime = new Date().getTime();
+  durNow = endTime - startTime;
+  titleTimeNum = Number(titleTimeNum + durNow);
+  newtaskTimeNum = Number(document.querySelector('.task.timmering .task-time-sum').getAttribute('tasktodaydur')) + durNow;
+  document.querySelector('.task.timmering .task-time-sum').setAttribute('tasktodaydur', newtaskTimeNum);
+  document.querySelector('.task.timmering .task-time-sum').innerHTML = formatTime('task', newtaskTimeNum);
+
+  clearInterval(timmerInterval);
+  changeTask(task_id, 'times', startTime + ' ' + endTime + ' ' + durNow);
+  vin.classList.remove('timmering');
+  document.querySelector('.' + task_id).classList.remove('timmering');
+  console.log('saved');
+}
+
+function formatTime(c, t) { //command, time
+  let formtedTime = '';
+  if (c == 'title') {
+    dayS = t / 1000;
+    dayM = Math.floor(dayS / 60);
+    dayH = Math.floor(dayM / 60);
+    dayM = Math.floor(dayM - (dayH * 60));
+    dayS = Math.floor(dayS - (dayM * 60) - (dayH * 60 * 60));
+    if (dayS < 10) {
+      dayS = '0' + dayS
+    }
+    if (dayM < 10) {
+      dayM = '0' + dayM
+    }
+    if (dayH < 10) {
+      dayH = '0' + dayH
+    }
+    formtedTime = dayH + ':' + dayM + ':' + dayS;
+  } else if (c == 'task') {
+    timeS = t / 1000;
+    timeM = Math.floor(timeS / 60);
+    timeH = Math.floor(timeM / 60);
+    timeD = Math.floor(timeH / 24);
+    timeH = Math.floor(timeH - timeD * 24);
+    timeM = Math.floor(timeM - timeH * 60 - timeD * 60 * 24);
+    timeS = Math.floor(timeS - timeM * 60 - timeH * 60 * 60 - timeD * 60 * 60 * 24);
+    if (t == 0) {
+      formtedTime = 'NEW';
+    } else if (t < 60 * 1000) {
+      formtedTime = timeS + 's';
+    } else if (t < 60 * 60 * 1000) {
+      formtedTime = timeM + 'm';
+      if (timeS > 5 && timeM < 15) {
+        formtedTime += ' ' + timeS + 's'
+      }
+    } else if (t < 24 * 60 * 60 * 1000) {
+      formtedTime = timeH + 'hrs';
+      if (timeM > 5 && timeH < 5) {
+        formtedTime += ' ' + timeM + 'm'
+      }
+    } else if (t < 2 * 24 * 60 * 60 * 1000) {
+      formtedTime = timeD + 'day';
+      if (timeH > 2) {
+        formtedTime += ' ' + timeH + 'hrs'
+      }
+    } else if (t < 7 * 24 * 60 * 60 * 1000) {
+      formtedTime = timeD + 'days';
+    } else if (timeD < 14 * 24 * 60 * 60 * 1000) {
+      formtedTime = (timeD / 7) + 'week';
+    } else {
+      formtedTime = (timeD / 7) + 'weeks';
+    }
+
+  }
+
+  return formtedTime;
+}

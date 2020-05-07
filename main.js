@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow ,   globalShortcut } = require('electron');
 
 function createWindow () {
   // Create the browser window.
@@ -10,7 +10,7 @@ function createWindow () {
     },
     backgroundColor: '#2e2c29',
     resizable:false,
-    // alwaysOnTop: true,
+    alwaysOnTop: true,
     titleBarStyle:'hidden',
     autoHideMenuBar:true
     //skipTaskbar:true
@@ -20,17 +20,27 @@ function createWindow () {
 
   win.loadFile('index.html');
 
+  // callback = function(window){
+  //   try {
+  //     console.log("App: " + window.app);
+  //     console.log("Title: " + window.title);
+  //   }catch(err) {
+  //     //console.log(err);
+  //   }
+  // }
+  // monitor.getActiveWindow(callback);
 
   // win.once('focus', () => win.flashFrame(false));
   // setTimeout(function(){
   //   win.flashFrame(true);
   // },2000000);
+
 }
-app.whenReady().then(createWindow);
+app.whenReady().then( createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
 })
 
