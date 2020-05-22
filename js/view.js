@@ -25,7 +25,9 @@ function showView(sw_view) {
       tasks += '<div class="task task_addnew_top" onclick="addTask(\'task_addnew_top\')"><div class="task-children-toggle-add"></div><span class="task-name">Add new task</span></div>';
     } else {
       //no tasks
-      tasks += '<div class="task"><div class="task-children-toggle-margin"></div><span class="task-name">You\'re free to go</span></div>';
+      //tasks += '<div class="task"><div class="task-children-toggle-margin"></div><span class="task-name"></span></div>';
+      //add new task
+      tasks += '<div class="task task_addnew_top" onclick="addTask(\'task_addnew_top\')"><div class="task-children-toggle-add"></div><span class="task-name">Add new task</span></div>';
     }
     content = '<div class="content">' + tasks + '</div>';
 
@@ -46,7 +48,7 @@ function showView(sw_view) {
     if (Object.keys(tasksObjects).length > 0) {
       for (i = 0; i < Object.keys(tasksObjects).length; i++) {
         task = tasksObjects[Object.keys(tasksObjects)[i]];
-        if (Object.keys(task.children).length == 0 && task.status !== 'almostready') {
+        if (Object.keys(task.children).length == 0 && task.status !== 'hah?ready') {
           task_id = Object.keys(tasksObjects)[i];
           //get task time
           taskFullTimeNum = 0; //from creting
@@ -67,7 +69,9 @@ function showView(sw_view) {
           taskTimeSumText = formatTime('task', taskFullTimeNum);
 
           taskToggle = '<div class="task-toggle ' + task.status + '" onclick="changeTask(\'' + task_id + '\',\'status\',\'toggle\')" ><span class="task-toggle-blocky"></span></div>';
-          tasks += '<div class="task ' + task_id + ' ' + task.status + '" taskid="' + task_id + '">' + taskToggle + '<span class="task-name" >' + task.name + '</span><span class="task-time-sum" taskTodayDur="' + taskTodayTimeNum + '">' + taskTimeSumText + '</span><span class="task-timmer-tools"><span class="task-timmer-toggle" onclick="triggerTaskTimmer(\'' + task_id + '\')"></span></span></div>';
+          if(task.status !== 'ready'){
+            tasks += '<div class="task ' + task_id + ' ' + task.status + '" taskid="' + task_id + '">' + taskToggle + '<span class="task-name" >' + task.name + '</span><span class="task-time-sum" taskTodayDur="' + taskTodayTimeNum + '">' + taskTimeSumText + '</span><span class="task-timmer-tools"><span class="task-timmer-toggle" onclick="triggerTaskTimmer(\'' + task_id + '\')"></span></span></div>';
+          }
 
         }
       }
@@ -440,7 +444,7 @@ function startTimmer(task_id) {
   }, 1000);
   let playsound = function(){
     if(document.querySelector('.task.timmering')){
-      sound = document.createElement('audio');
+        sound = document.createElement('audio');
       timeNow = new Date().getTime();
       durNow = (timeNow - startTime)/3600000;
       if(Math.abs(durNow - Math.round(durNow)) < 0.1){
@@ -449,16 +453,17 @@ function startTimmer(task_id) {
         sound.src = './static/aberrian_short.mp3';
       }
       sound.volume = 0.05;
+      sound.classList.add('sound-player');
       sound.play();
-      document.querySelector('.task.timmering').appendChild(sound);
+      //document.querySelector('.vin').appendChild(sound);
       setTimeout(function(){
         playsound();
       },1000*60*15);
     }
   }
-  setTimeout(function(){
-    playsound();
-  },1000);
+  playsound();
+  // setTimeout(function(){
+  // },1000);
 }
 
 function saveTaskTimmer(task_id) {
@@ -512,7 +517,11 @@ function formatTime(c, t) { //command, time
         formtedTime += ' ' + timeS + 's'
       }
     } else if (t < 24 * 60 * 60 * 1000) {
-      formtedTime = timeH + 'hrs';
+      if(timeH<2){
+        formtedTime = timeH + 'hr';
+      }else{
+        formtedTime = timeH + 'hrs';
+      }
       if (timeM > 5 && timeH < 5) {
         formtedTime += ' ' + timeM + 'm'
       }

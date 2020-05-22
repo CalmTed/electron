@@ -11,14 +11,25 @@ function getData(c) {
   if (c == 'tasks') {
     if (localStorage.getItem('data') != null) {
       let data = JSON.parse(localStorage.getItem('data'));
-      project = [];
+      project = {};
       for (i = 0; i < Object.keys(data).length; i++) {
         if (data[selected_project] != null) {
           project = data[selected_project];
+        }else{
+          project = {
+            name: selected_project,
+            tasks:{},
+            tasks:{},
+            participants:{
+              'user_1': selected_user
+            }
+          }
+            data[selected_project] = project;
+            setData(data);
         }
       }
-
-      if (Object.keys(project.tasks).length > 0 && Object.values(project.participants).filter(user => user = selected_user).length > 0) {
+      //Object.keys(project.tasks).length > 0 &&
+      if ( Object.values(project.participants).filter(user => user = selected_user).length > 0) {
         data = project.tasks; //.filter(user => project == selected_project)
         return data;
       } else {
@@ -58,6 +69,8 @@ function setData(c, value) {
       return false;
     }
 
+  }else if( c == 'data'){
+    localStorage.setItem('data', JSON.stringify(value));
   }
 }
 
@@ -156,7 +169,7 @@ function changeTask(task_id, task_prop, task_value) {
 }
 
 function createTask(parent, task_name, [data] = []) {
-
+  console.log('creating');
   tasksObjects = getData('tasks');
   //create random id
   task_id = 'task_' + getRandomId(5);

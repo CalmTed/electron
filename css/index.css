@@ -418,7 +418,7 @@ margin: 0;
   opacity: 1;
   visibility: visible;
 }
-.vin.timmering .task:hover .task-timmer-tools, .task.read y:hover .task-timmer-tools{
+.vin.timmering .task:hover .task-timmer-tools, .task.ready:hover .task-timmer-tools{
   opacity: 0;
   visibility: hidden;
 }
@@ -521,7 +521,7 @@ margin: 0;
   background: var(--hover);
   cursor: pointer;
 }
-/* 
+/*
 callback = function(window){
   try {
     console.log("App: " + window.app);
