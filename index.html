@@ -14,16 +14,17 @@
       <div class="button" onclick="menu('toggle')">
       </div>
       <div class="menu-options">
-        <div class="menu-option" onclick="showView('planner');menu('toggle');">Planner</div>
         <div class="menu-option" onclick="showView('tracker');menu('toggle');">Timmer</div>
-        <div class="menu-option" onclick="openFromJSON();menu('toggle');">Load from JSON</div>
-        <div class="menu-option" onclick="saveToJSON();menu('toggle');">Save to JSON</div>
-        <div class="menu-option" onclick="changePrName();menu('toggle');">Change Project</div>
+        <div class="menu-option" onclick="showView('planner');menu('toggle');">Planner</div>
+        <div class="menu-option" onclick="showView('analitics');menu('toggle');">Analitics</div>
+        <div class="menu-option" onclick="d_openFromJSON();menu('toggle');">Load from JSON</div>
+        <div class="menu-option" onclick="d_saveToJSON();menu('toggle');">Save to JSON</div>
+        <!-- <div class="menu-option" onclick="changePrName();menu('toggle');">Change Project</div> -->
       </div>
     </div>
   </body>
   <script>
-    var selected_view = "tracker";
+    var selected_view = "analitics";
     var selected_project = "project_1";
     // var selected_project = "project_2";
     var selected_user = "ted";

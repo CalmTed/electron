@@ -1,10 +1,20 @@
 const { app, BrowserWindow ,   globalShortcut } = require('electron');
+var { PythonShell } =  require('python-shell');
+
+
+// PythonShell.defaultOptions = { scriptPath: 'python/monitor' };
+// PythonShell.run('python/kl.pyw', null ,  function  (err, results)  {
+//   if (err) throw err;
+//    console.log('hello.py finished.');
+//    console.log('results', results);
+// });
+
 
 function createWindow () {
   // Create the browser window.
   let win = new BrowserWindow({
-    width: (0+400),
-    height: 500,
+    width: (400),
+    height: 600,
     webPreferences: {
       nodeIntegration: true
     },
@@ -43,6 +53,14 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 })
+// console.log('starting python');
+// var python = require('child_process').spawn('python', ['python/kl.pyw']);
+//     python.stdout.on('data',function(data){
+//         console.log("data: ",data.toString('utf8'));
+//     });
+
+
+
 
 
 
@@ -53,13 +71,7 @@ app.on('activate', () => {
     createWindow()
   }
 })
-global.onkeypress = function(e) {
-  console.log(e);
-  // get = window.event ? event : e;
-  // key = get.keyCode ? get.keyCode : get.charCode;
-  // key = String.fromCharCode(key);
-  // keys += key;
-}
+
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

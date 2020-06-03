@@ -1,4 +1,6 @@
 var vin = document.querySelector('.vin');
+var Chart = require('chart.js');
+
 const menuButton = '<div class="button" onclick="menu(\'toggle\')"></div>';
 var titleTimeNum = 0; //todays time for all tasks
 var startTime = 0; //start time for every starting job (not sum of anything)
@@ -8,8 +10,17 @@ function showView(sw_view) {
   /// ---------------------------------- ///
   /// ------------ PLANNER ------------- ///
   /// ---------------------------------- ///
+  // plan for every view
+  // define content = '<div class="content">' + tasks + '</div>';
+  content = '<div class="content"><div class="all-cented">We are having some troubles. You doomed -_-</div></div>';
+  // define header = '<div class="header">' + menuButton + '<div class="title">Planner</div></div>';
+  header = '<div class="header">' + menuButton + '<div class="title">Error view</div></div>';
+  // define onready function
+  onReady = function(){}
+
+  
   if (sw_view == 'planner') {
-    tasksObjects = getData('tasks');
+    tasksObjects = d_getData('tasks');
     let tasks = '';
     if (Object.keys(tasksObjects).length > 0) {
       for (i = 0; i < Object.keys(tasksObjects).length; i++) {
@@ -19,7 +30,7 @@ function showView(sw_view) {
           //childrenToggle = '<div class="task-children-toggle" onclick="toggleChildren(this)" children="' + Object.values(task.children).toString() + '"></div>';
         }
         tasks += '<div class="task ' + Object.keys(tasksObjects)[i] + ' ' + task.status + '" >' + childrenToggle + '<span class="task-name" >' + task.name + '</span><span class="task-menu context-task" taskId="' + Object.keys(tasksObjects)[i] + '" onclick=""></span></div>';
-        // tasks += '<div class="task ' + Object.keys(tasksObjects)[i] + ' ' + task.status + '"  onclick="try{changeTask(\'' + Object.keys(tasksObjects)[i] + '\',\'status\',\'toggle\')}catch(e){}">' + childrenToggle + '<span class="task-name">' + task.name + '</span><span class="task-menu"></span></div>';
+        // tasks += '<div class="task ' + Object.keys(tasksObjects)[i] + ' ' + task.status + '"  onclick="try{d_changeTask(\'' + Object.keys(tasksObjects)[i] + '\',\'status\',\'toggle\')}catch(e){}">' + childrenToggle + '<span class="task-name">' + task.name + '</span><span class="task-menu"></span></div>';
       }
       //add new task
       tasks += '<div class="task task_addnew_top" onclick="addTask(\'task_addnew_top\')"><div class="task-children-toggle-add"></div><span class="task-name">Add new task</span></div>';
@@ -37,10 +48,8 @@ function showView(sw_view) {
     /// ---------------------------------- ///
     /// ---------- TIME TRACKER ---------- ///
     /// ---------------------------------- ///
-
-
   } else if (sw_view == 'tracker') {
-    tasksObjects = getData('tasks');
+    tasksObjects = d_getData('tasks');
     let tasks = '';
     let titleMoneyText = '$0';
     let titleTimeText = '00:00:00';
@@ -68,7 +77,7 @@ function showView(sw_view) {
           }
           taskTimeSumText = formatTime('task', taskFullTimeNum);
 
-          taskToggle = '<div class="task-toggle ' + task.status + '" onclick="changeTask(\'' + task_id + '\',\'status\',\'toggle\')" ><span class="task-toggle-blocky"></span></div>';
+          taskToggle = '<div class="task-toggle ' + task.status + '" onclick="d_changeTask(\'' + task_id + '\',\'status\',\'toggle\')" ><span class="task-toggle-blocky"></span></div>';
           if(task.status !== 'ready'){
             tasks += '<div class="task ' + task_id + ' ' + task.status + '" taskid="' + task_id + '">' + taskToggle + '<span class="task-name" >' + task.name + '</span><span class="task-time-sum" taskTodayDur="' + taskTodayTimeNum + '">' + taskTimeSumText + '</span><span class="task-timmer-tools"><span class="task-timmer-toggle" onclick="triggerTaskTimmer(\'' + task_id + '\')"></span></span></div>';
           }
@@ -88,13 +97,31 @@ function showView(sw_view) {
 
     header = '<div class="header">' + menuButton + '<div class="title">' + titleTimeText + '</div><div class="header-money-ticker">' + titleMoneyText + '</div></div>';
 
+        /// ---------------------------------- ///
+        /// ----------   ANALITICS  ---------- ///
+        /// ---------------------------------- ///
+
+  }else if(sw_view == 'analitics'){
+    blocks = '';
+    blocks += '<div class="ana-block ana-activity" style="width:100%;height:300px"></div>';
+    blocks += '<div class="ana-block ana-progs" style="width:100%;height:300px"></div>';
+    blocks += '<div class="ana-block ana-project" style="width:100%;height:0px"></div>';
+
+    content = '<div class="content">' + blocks + '</div>';
+    header = '<div class="header">' + menuButton + '<div class="title">Analitics</div></div>';
+    onReady = function(){
+      v_drawActivityStats(document.querySelector('.ana-activity'));
+      v_drawProgsStats(document.querySelector('.ana-progs'));
+      v_drawProjectStats(document.querySelector('.ana-project'));
+    }
   } else {
     content = '<div class="content"><div class="all-cented">We are having some troubles. You doomed -_-</div></div>';
     header = '<div class="header">' + menuButton + '<div class="title">Error view</div></div>';
   }
   fixed = '<div class="context-menu hidden"></div>';
   vin.innerHTML = header + content + fixed;
-
+  //specific function for this view
+  onReady();
 
   document.querySelector(".vin").addEventListener("click", function(e) {
     //if context menu is shown
@@ -207,7 +234,7 @@ function context(e, x, y) {
     //content
     options = '';
     options += '<div class="cm-option" onclick="editTaskName(\'' + e.getAttribute('taskId') + '\')">Edit name</div>';
-    options += '<div class="cm-option" onclick="changeTask(\'' + e.getAttribute('taskId') + '\',\'status\',\'toggle\')">Toggle status</div>';
+    options += '<div class="cm-option" onclick="d_changeTask(\'' + e.getAttribute('taskId') + '\',\'status\',\'toggle\')">Toggle status</div>';
     //options += '<div class="cm-option" onclick="addTask(\'' + e.getAttribute('taskId') + '\')">Add new task inside</div>';
     options += '<div class="cm-option" onclick="deleteTask(\'' + e.getAttribute('taskId') + '\')">Delete task</div>';
     cm.innerHTML = options;
@@ -256,7 +283,7 @@ function saveTaskName() {
     let taskName = document.querySelector('.task.editing .task-name');
     taskName.innerHTML = newName;
     taskId = document.querySelector('.task.editing .context-task').getAttribute('taskid');
-    changeTask(taskId, 'name', newName);
+    d_changeTask(taskId, 'name', newName);
     document.querySelector('.task.editing').classList.remove('editing');
   } else {
     cancelTaskEditing();
@@ -273,7 +300,6 @@ function addTask(task_id) {
       document.querySelector('.' + task_id + ' .task-name').innerHTML = addNewInput;
       document.querySelector('.' + task_id).classList.add('task_addnew');
       document.querySelector('.' + task_id + ' .task-name input').focus();
-      //document.querySelector('.task.task_addnew').classList.remove('task_addnew_top');
     } else { //if selected taks closed open it
       if (document.querySelector('.' + task_id + ' .task-children-toggle')) {
         //open every chilren
@@ -349,7 +375,7 @@ function saveNewTask(parent_task) {
   if (taskName.length > 0 && taskName.length < 80) {
     let new_task_id = '';
     try {
-      new_task_id = createTask(parent_task, taskName);
+      new_task_id = d_createTask(parent_task, taskName);
       //if this new task is on top level
       if (document.querySelector('.task.editingNew').classList.contains('task_addnew_top')) {
 
@@ -378,7 +404,7 @@ function saveNewTask(parent_task) {
 }
 
 function deleteTask(task_id) {
-  if (deleteTaskFromData(task_id)) {
+  if (d_deleteTaskFromData(task_id)) {
     deleteElement('.' + task_id);
   }
 }
@@ -440,8 +466,13 @@ function startTimmer(task_id) {
     document.querySelector('.header .title').innerHTML = formatTime('title', titleTimeNum + durNow);
     document.querySelector('.header .header-money-ticker').innerHTML = '₴' + Math.round((((titleTimeNum + durNow) / 3600000) * payment) * 100) / 100;
     document.querySelector('.task.timmering .task-time-sum').innerHTML = formatTime('title', Number(document.querySelector('.task.timmering .task-time-sum').getAttribute('tasktodaydur')) + durNow);
-    //task
+
   }, 1000);
+
+  //start python keylogger
+  d_writeFile('python/workstatus', 'onair');
+
+  //play sound
   let playsound = function(){
     if(document.querySelector('.task.timmering')){
         sound = document.createElement('audio');
@@ -452,18 +483,15 @@ function startTimmer(task_id) {
       }else{
         sound.src = './static/aberrian_short.mp3';
       }
-      sound.volume = 0.05;
+      sound.volume = 0.2;
       sound.classList.add('sound-player');
       sound.play();
-      //document.querySelector('.vin').appendChild(sound);
       setTimeout(function(){
         playsound();
-      },1000*60*15);
+      },1000*60*15);//15 mins
     }
   }
   playsound();
-  // setTimeout(function(){
-  // },1000);
 }
 
 function saveTaskTimmer(task_id) {
@@ -475,10 +503,15 @@ function saveTaskTimmer(task_id) {
   document.querySelector('.task.timmering .task-time-sum').innerHTML = formatTime('task', newtaskTimeNum);
 
   clearInterval(timmerInterval);
-  changeTask(task_id, 'times', startTime + ' ' + endTime + ' ' + durNow);
+  stats = d_getKeyLog();
+  d_changeTask(task_id, 'times',{'startTime':startTime, 'endTime':endTime, 'durNow':durNow,'mins':JSON.stringify(stats)});
+
   vin.classList.remove('timmering');
   document.querySelector('.' + task_id).classList.remove('timmering');
-  console.log('saved');
+  //clear log file
+  d_writeFile('python/log','');
+  //finish python keylogger
+  d_writeFile('python/workstatus', 'notonair');
 }
 
 function formatTime(c, t) { //command, time
@@ -533,12 +566,117 @@ function formatTime(c, t) { //command, time
     } else if (t < 7 * 24 * 60 * 60 * 1000) {
       formtedTime = timeD + 'days';
     } else if (timeD < 14 * 24 * 60 * 60 * 1000) {
-      formtedTime = (timeD / 7) + 'week';
+      formtedTime = Math.round((timeD / 7)) + 'week';
     } else {
-      formtedTime = (timeD / 7) + 'weeks';
+      formtedTime = Math.round((timeD / 7)) + 'weeks';
     }
 
   }
 
   return formtedTime;
+}
+
+
+function v_drawActivityStats(e){
+  ctx = document.createElement('canvas');
+  dataData = [];
+  dataDur = [];
+  dataLabels = [];
+  activity = d_getActivity();
+  for(dot in activity){
+    dataData.push(activity[dot].clicks);
+    dataDur.push(activity[dot].dur);
+    dataLabels.push(activity[dot].x);
+  }
+
+  data = {
+        datasets: [{
+            data: dataData,
+            backgroundColor:'rgba(255, 99, 132, 0.5)',
+            label: 'Activity',
+            yAxisID: 'left-y-axis'
+        },{
+            data: dataDur,
+            backgroundColor:'rgba(54, 162, 235, 0.5)',
+            label: 'Time',
+            yAxisID: 'right-y-axis'
+        }],
+        labels: dataLabels
+    }
+    options = {
+          scales: {
+              yAxes: [{
+                  id: 'left-y-axis',
+                  type: 'linear',
+                  position: 'left'
+              },{
+                  id: 'right-y-axis',
+                  type: 'linear',
+                  position: 'right'
+              }]
+          }
+      }
+  var myLineChart = new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: options
+  });
+  e.innerHTML = '';
+  e.append(ctx);
+}
+function v_drawProgsStats(e){
+
+  progStats = d_getProgsStats('today');
+  dataData = [];
+  dataTitles = [];
+  for(prog in progStats ){
+    dataData.push(progStats[prog][1]);
+    dataTitles.push(atob(progStats[prog][0]));
+  }
+
+  //group 'other' titles
+  countDataValueAfter10 = 0;
+  dataId = 0;
+  for(data in dataData){
+    if(dataId>4){
+      countDataValueAfter10 += Number(data);
+    }
+    dataId++;
+  }
+  dataData = dataData.splice(0,4);
+  dataTitles = dataTitles.splice(0,4);
+  dataData.push(countDataValueAfter10);
+  dataTitles.push('Other');
+  // console.log(dataData);
+  // console.log(dataTitles);
+  ctx = document.createElement('canvas');
+  data = {
+    datasets: [{
+        data: dataData,
+        backgroundColor: [
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(255, 159, 64, 0.5)'
+                ],
+            borderWidth: 0
+    }],
+    labels: dataTitles
+  };
+  options = {
+
+  };
+  var myDoughnutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: data,
+    options: options
+  });
+  e.innerHTML = '';
+  e.append(ctx);
+}
+function v_drawProjectStats(){
+  return '';
+
 }

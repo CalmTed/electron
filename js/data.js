@@ -1,12 +1,10 @@
 const {
   dialog
 } = require('electron').remote;
-// const { globalShortcut } = require('electron');
-//var monitor = require('active-window');
 
 var fs = require('fs');
 
-function getData(c) {
+function d_getData(c) {
   //let data = ["Get some healthy sleep", "Create electron example"];
   if (c == 'tasks') {
     if (localStorage.getItem('data') != null) {
@@ -15,22 +13,21 @@ function getData(c) {
       for (i = 0; i < Object.keys(data).length; i++) {
         if (data[selected_project] != null) {
           project = data[selected_project];
-        }else{
+        } else {
           project = {
             name: selected_project,
-            tasks:{},
-            tasks:{},
-            participants:{
+            tasks: {},
+            tasks: {},
+            participants: {
               'user_1': selected_user
             }
           }
-            data[selected_project] = project;
-            setData(data);
+          data[selected_project] = project;
+          d_setData(data);
         }
       }
-      //Object.keys(project.tasks).length > 0 &&
-      if ( Object.values(project.participants).filter(user => user = selected_user).length > 0) {
-        data = project.tasks; //.filter(user => project == selected_project)
+      if (Object.values(project.participants).filter(user => user = selected_user).length > 0) {
+        data = project.tasks;
         return data;
       } else {
         console.error("No project found named: " + selected_project);
@@ -44,8 +41,7 @@ function getData(c) {
   }
 }
 
-function setData(c, value) {
-  //let data = ["Get some healthy sleep", "Create electron example"];
+function d_setData(c, value) {
   if (c == 'tasks') {
     if (localStorage.getItem('data') != null) {
       let data = JSON.parse(localStorage.getItem('data'));
@@ -69,12 +65,12 @@ function setData(c, value) {
       return false;
     }
 
-  }else if( c == 'data'){
+  } else if (c == 'data') {
     localStorage.setItem('data', JSON.stringify(value));
   }
 }
 
-function openFromJSON() {
+function d_openFromJSON() {
   dialog.showOpenDialog({
     filters: [{
       name: 'JSON file',
@@ -91,8 +87,6 @@ function openFromJSON() {
         }
         localStorage.setItem('data', data);
         showView(selected_view);
-        //convertFromTabulatedToJSON(data);
-        //return data;
       });
     }
   }).catch(err => {
@@ -100,35 +94,35 @@ function openFromJSON() {
   });
 };
 
-function saveToJSON() {
+function d_saveToJSON() {
   date = new Date();
   datevalues = [
-     date.getFullYear(),
-     date.getMonth()+1,
-     date.getDate(),
-     date.getHours(),
-     date.getMinutes(),
-     date.getSeconds(),
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
   ];
   dialog.showSaveDialog({
     filters: [{
       name: 'JSON file',
       extensions: ['json']
     }],
-    title: 'save_'+ datevalues.join('-'),
+    title: 'save_' + datevalues.join('-'),
     properties: ['saveFile']
   }).then(fileName => {
-      console.log(fileName.filePath);
-      fs.writeFile(fileName.filePath,localStorage.getItem('data'), function(err) {
-        if (err) return console.log(err);
-      });
+    console.log(fileName.filePath);
+    fs.writeFile(fileName.filePath, localStorage.getItem('data'), function(err) {
+      if (err) return console.log(err);
+    });
   }).catch(err => {
     console.log(err)
   });
 };
 
-function changeTask(task_id, task_prop, task_value) {
-  tasksObjects = getData('tasks');
+function d_changeTask(task_id, task_prop, task_value) {
+  tasksObjects = d_getData('tasks');
   //if we have any task
   if (Object.keys(tasksObjects).length > 0) {
     if (tasksObjects[task_id] !== null) {
@@ -145,7 +139,7 @@ function changeTask(task_id, task_prop, task_value) {
             'notready';
         }
         tasksObjects[task_id].status = newvalue;
-        if (setData('tasks', tasksObjects)) {
+        if (d_setData('tasks', tasksObjects)) {
           updatedTask = document.querySelector('.' + task_id);
           updatedTask.classList.remove('ready');
           updatedTask.classList.remove('notready');
@@ -154,25 +148,24 @@ function changeTask(task_id, task_prop, task_value) {
         }
       } else if (task_prop == 'name') {
         tasksObjects[task_id].name = task_value;
-        setData('tasks', tasksObjects);
+        d_setData('tasks', tasksObjects);
       } else if (task_prop == 'times') {
         let newTime = {};
-        task_value = task_value.split(' ');
-        newTime.start = task_value[0];
-        newTime.end = task_value[1];
-        newTime.duration = task_value[2];
+        newTime.start = task_value.startTime;
+        newTime.end = task_value.endTime;
+        newTime.duration = task_value.durNow;
+        newTime.mins = JSON.parse(JSON.parse(task_value.mins));
         tasksObjects[task_id].times[Object.keys(tasksObjects[task_id].times).length + 1] = newTime;
-        setData('tasks', tasksObjects);
+        d_setData('tasks', tasksObjects);
       }
     }
   }
 }
 
-function createTask(parent, task_name, [data] = []) {
-  console.log('creating');
-  tasksObjects = getData('tasks');
+function d_createTask(parent, task_name, [data] = []) {
+  tasksObjects = d_getData('tasks');
   //create random id
-  task_id = 'task_' + getRandomId(5);
+  task_id = 'task_' + d_getRandomId(5);
   //create new task
   newObject = new Object();
   newObject.name = task_name;
@@ -180,18 +173,17 @@ function createTask(parent, task_name, [data] = []) {
   newObject.status = 'notready';
   newObject.children = {};
   //add child id to parent
-
   //tasksObjects[parent].children[Object.keys(tasksObjects[parent].children).length+1] = task_id;
   //add to all tasks
   tasksObjects[task_id] = newObject;
-  setData('tasks', tasksObjects);
+  d_setData('tasks', tasksObjects);
 }
 
-function deleteTaskFromData(task_id) {
+function d_deleteTaskFromData(task_id) {
   try {
-    tasksObjects = getData('tasks');
+    tasksObjects = d_getData('tasks');
     delete tasksObjects[task_id];
-    setData('tasks', tasksObjects);
+    d_setData('tasks', tasksObjects);
     return true;
   } catch (e) {
     console.log('Error on deleting ' + task_id);
@@ -199,7 +191,7 @@ function deleteTaskFromData(task_id) {
   }
 }
 
-function getRandomId(length) {
+function d_getRandomId(length) {
   chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
   let word = '';
   for (let i = 0; i < length; i++) {
@@ -208,61 +200,142 @@ function getRandomId(length) {
   return word;
 }
 
-// globalShortcut.registerAll(['Space','Enter','Tab','Shift','Backspace','9'], () => {
-//  console.log('something is pressed')
-// })
+function d_readFile(filepath) {
+  let text = fs.readFileSync(filepath, 'utf8', (err, data) => {
+    if (err) {
+      text = 'ERROR: ' + err;
+    } else {
+      text = data;
+    }
+  });
+  return text;
+}
 
+function d_writeFile(filepath, text) {
+  fs.writeFile(filepath, text, function(err) {
+    if (err) return alert(err);
+  });
+}
 
-// setInterval(function () {
-// },4000);
+function d_getKeyLog() {
+  kLData = d_readFile('python/log');
+  if (kLData[0] == ',') {
+    kLData = kLData.slice(1);
+  }
+  return '{' + kLData + '}';
+}
 
+function d_getMins(since) {
+  date = new Date();
+  if (since == 'today') {
+    lastMidnight = date.getTime() - (date.getSeconds() * 1000 + date.getMinutes() * 60000 + date.getHours() * 3600000);
+  } else {
+    lastMidnight = 0
+  }
+  tasksObjects = d_getData('tasks');
+  allTimesToday = {}
+  allTimesToday[lastMidnight] = {
+    'start': String(lastMidnight),
+    'end': String(lastMidnight + 1),
+    'duration': '1'
+  }
+  allTimesThisWeek = {}
+  //gett all times from today
+  for (task in tasksObjects) {
+    for (times in tasksObjects[task].times) {
+      if (tasksObjects[task].times[times].start > lastMidnight) {
+        allTimesToday[tasksObjects[task].times[times].start] = tasksObjects[task].times[times];
+      }
+    }
+  }
+  return allTimesToday;
+}
 
-// TOO HARD and LONG FOR 1AM
-//
-// function convertFromTabula tedToJSON(text){
-//     let textArray = text.split('\n');
-//     let data = {};
-//     data = cFtTjOr(textArray,'start',data,0,0);
-//     return JSON.stringify(data);
-// }
-// //convert From Tabulated To JSON Object Resource
-// function cFtTjOr(textArray,command,data,line,level){
-//   if(line>=textArray.length){
-//     return data;
-//   }
-//   if(typeof textArray[line] != 'undefined' && textArray[line] != '' ){
-//
-//   }
-//   if(command == 'start'){
-//     console.log('starting');
-//       linelevel = 0;
-//       //count spaces (for double spaces)
-//       for(i=0;i<textArray[line].length;i++){
-//         if(textArray[line][i] == ' '){
-//           linelevel+=0.5;
-//         }else{
-//           //finish loop
-//           i = textArray[line].length;
-//         }
-//       }
-//       //trim line
-//       textArray[line] = textArray[line].slice(linelevel);
-//       if(linelevel>level){
-//         data = cFtTjOr(textArray,'up',data,line++,level++);
-//       }else if(linelevel<level){
-//         data = cFtTjOr(textArray,'down',data,line--,linelevel);
-//       }else{
-//         data = cFtTjOr(textArray,'same',data,line--,linelevel);
-//       }
-//       console.log(level,linelevel,textArray[line]);
-//     }
-//   }else if(command = 'up'){
-//
-//   }else if(command = 'down'){
-//
-//   }else if(command = 'end'){
-//
-//   }else{
-//     console.log('hm... strange');
-//   }
-// }
+function d_getActivity(since) {
+  let allTimesToday = d_getMins('today');
+  //analize activity
+  let activity = [];
+  //gee activity for every hour
+  for (i = 0; i <= 24; i++) {
+    minTime = lastMidnight + (1000 * 60 * 60 * i);
+    maxTime = lastMidnight + (1000 * 60 * 60 * i) + (1000 * 60 * 59);
+    timeActivity = 0
+    timeDuration = 0
+    for (time in allTimesToday) {
+      for (min in allTimesToday[time].mins) {
+        if (min > minTime && min < maxTime) {
+          timeDuration += 1
+          timeActivity += Number(allTimesToday[time].mins[min].keys)
+          timeActivity += Number(allTimesToday[time].mins[min].mouse)
+        }
+      }
+    }
+    activity.push({
+      x: i,
+      dur: timeDuration,
+      clicks: timeActivity
+    });
+    //
+    // activity.push({
+    //   x: (date.getTime() - lastMidnight) / 1000,
+    //   y: 0
+    // });
+    //
+    // activity.push({
+    //   x: 60 * 60 * 24,
+    //   y: 0
+    // });
+  }
+  return activity;
+}
+
+function d_getProgsStats(since) {
+  let allTimesToday = d_getMins(since);
+  let progs = [];
+
+  for (time in allTimesToday) {
+    for (min in allTimesToday[time].mins) {
+      for (prog in allTimesToday[time].mins[min].progs) {
+        timeActivity = 0;
+
+        if (allTimesToday[time].mins[min].progs[prog].keyboard)
+          timeActivity += Number(allTimesToday[time].mins[min].progs[prog].keyboard);
+        if (allTimesToday[time].mins[min].progs[prog].mouse)
+          timeActivity += Number(allTimesToday[time].mins[min].progs[prog].mouse);
+        if (allTimesToday[time].mins[min].progs[prog].duration)
+          timeActivity += Number(allTimesToday[time].mins[min].progs[prog].duration);
+
+        title = allTimesToday[time].mins[min].progs[prog].title;
+        //decode title
+        title = atob(title);
+        //grouping classes, works manualy now
+        titleClasses = ['Atom$','YouTube$','Google Chrome$','^Telegram'];
+        titleClassesNames = ['Atom','YouTube','Google Chrome','Telegram'];
+        for(titleClass in titleClasses){
+          re = new RegExp(titleClasses[titleClass],'gi');
+          if(re.test(title)){
+            title = titleClassesNames[titleClass];
+          }
+        }
+        //encode title
+        title = btoa(title);
+
+        if(typeof progs[title] == 'undefined') {
+          progs[title] = 0;
+        }
+        progs[title] += timeActivity;
+      }
+    }
+  }
+  newprog = []
+  activityCount = 0;
+  //convert for more sortable array
+  for(prog in progs){
+    newprog.push([prog,progs[prog]]);
+  }
+  progs = newprog;
+  progs.sort(function(a,b){
+    return b[1] - a[1];
+  });
+  return progs;
+}
